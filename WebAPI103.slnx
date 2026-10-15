@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="WebAPI103/WebAPI103.csproj" />
+</Solution>
