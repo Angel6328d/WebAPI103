@@ -1,5 +1,5 @@
-﻿using WebAPI103.Services.Interfaces;
-using Domain.Entities;
+﻿using Domain.dto;
+using WebAPI103.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI103.Controllers
@@ -30,16 +30,19 @@ namespace WebAPI103.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Crear(Usuario usuario)
+        public async Task<IActionResult> Crear(UsuarioRequestDto usuario)
         {
             var result = await _usuarioService.Create(usuario);
+
+            if (!result.Success)
+                return BadRequest(result);
+
             return Ok(result);
         }
+
         // Actualizar usuario
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(
-            int id,
-            Usuario usuario)
+        public async Task<IActionResult> Update(int id, UsuarioRequestDto usuario)
         {
             var response = await _usuarioService.Update(id, usuario);
 

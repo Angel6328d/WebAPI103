@@ -11,8 +11,8 @@ using WebAPI103.Context;
 namespace WebAPI103.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261009225835_NuevaBd")]
-    partial class NuevaBd
+    [Migration("20261020172338_Example103")]
+    partial class Example103
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,32 +41,32 @@ namespace WebAPI103.Migrations
 
                     b.HasKey("PkRol");
 
-                    b.ToTable("Roles");
+                    b.ToTable("rols");
 
                     b.HasData(
                         new
                         {
                             PkRol = 1,
                             Estatus = true,
-                            Nombre = "sa"
+                            Nombre = "SA"
                         },
                         new
                         {
                             PkRol = 2,
                             Estatus = false,
-                            Nombre = "admin"
+                            Nombre = "Admin"
                         });
                 });
 
             modelBuilder.Entity("Domain.Entities.Usuario", b =>
                 {
-                    b.Property<int>("PKUsuario")
+                    b.Property<int>("PkUsuario")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PKUsuario"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PkUsuario"));
 
-                    b.Property<int>("FKRol")
+                    b.Property<int>("FkRol")
                         .HasColumnType("int");
 
                     b.Property<string>("Nombre")
@@ -77,24 +77,24 @@ namespace WebAPI103.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("PKUsuario");
+                    b.HasKey("PkUsuario");
 
-                    b.HasIndex("FKRol");
+                    b.HasIndex("FkRol");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("usuarios");
 
                     b.HasData(
                         new
                         {
-                            PKUsuario = 1,
-                            FKRol = 1,
+                            PkUsuario = 1,
+                            FkRol = 1,
                             Nombre = "Angel",
-                            Password = "contraseña123",
-                            UserName = "Chocoroll"
+                            Password = "123456",
+                            Username = "Chocorroll"
                         });
                 });
 
@@ -102,7 +102,7 @@ namespace WebAPI103.Migrations
                 {
                     b.HasOne("Domain.Entities.Rol", "Roles")
                         .WithMany()
-                        .HasForeignKey("FKRol")
+                        .HasForeignKey("FkRol")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -7,13 +7,13 @@
 namespace WebAPI103.Migrations
 {
     /// <inheritdoc />
-    public partial class NuevaBd : Migration
+    public partial class Example103 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Roles",
+                name: "rols",
                 columns: table => new
                 {
                     PkRol = table.Column<int>(type: "int", nullable: false)
@@ -23,59 +23,59 @@ namespace WebAPI103.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.PkRol);
+                    table.PrimaryKey("PK_rols", x => x.PkRol);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Usuarios",
+                name: "usuarios",
                 columns: table => new
                 {
-                    PKUsuario = table.Column<int>(type: "int", nullable: false)
+                    PkUsuario = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FKRol = table.Column<int>(type: "int", nullable: false)
+                    FkRol = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Usuarios", x => x.PKUsuario);
+                    table.PrimaryKey("PK_usuarios", x => x.PkUsuario);
                     table.ForeignKey(
-                        name: "FK_Usuarios_Roles_FKRol",
-                        column: x => x.FKRol,
-                        principalTable: "Roles",
+                        name: "FK_usuarios_rols_FkRol",
+                        column: x => x.FkRol,
+                        principalTable: "rols",
                         principalColumn: "PkRol",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
-                table: "Roles",
+                table: "rols",
                 columns: new[] { "PkRol", "Estatus", "Nombre" },
                 values: new object[,]
                 {
-                    { 1, true, "sa" },
-                    { 2, false, "admin" }
+                    { 1, true, "SA" },
+                    { 2, false, "Admin" }
                 });
 
             migrationBuilder.InsertData(
-                table: "Usuarios",
-                columns: new[] { "PKUsuario", "FKRol", "Nombre", "Password", "UserName" },
-                values: new object[] { 1, 1, "Angel", "contraseña123", "Chocoroll" });
+                table: "usuarios",
+                columns: new[] { "PkUsuario", "FkRol", "Nombre", "Password", "Username" },
+                values: new object[] { 1, 1, "Angel", "123456", "Chocorroll" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Usuarios_FKRol",
-                table: "Usuarios",
-                column: "FKRol");
+                name: "IX_usuarios_FkRol",
+                table: "usuarios",
+                column: "FkRol");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Usuarios");
+                name: "usuarios");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "rols");
         }
     }
 }

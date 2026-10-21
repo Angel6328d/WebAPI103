@@ -24,6 +24,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Registro de servicios de usuarios
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IRolService, RolService>();
 
 // 2. CONSTRUCCIÓN DE LA APLICACIÓN
 var app = builder.Build();
