@@ -1,7 +1,9 @@
-﻿using Domain.dto;
+﻿using Dapper;
+using Domain.dto;
 using Domain.Entities;
 using Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using WebAPI103.Context;
 using WebAPI103.Services.Interfaces;
 
@@ -20,21 +22,30 @@ namespace WebAPI103.Services
         // Obtener todos los usuarios
         public async Task<Response<List<UsuarioDto>>> ObtenerUsuario()
         {
-            var usuarios = await _context.usuarios
-                .Select(u => new UsuarioDto
+            var usuarios = await _context.Database.GetDbConnection()
+                .QueryAsync<Usuario>("spGetUsers", commandType: System.Data.CommandType.StoredProcedure);
+
+            if (usuarios == null || !usuarios.Any())
+            {
+                return new Response<List<UsuarioDto>>
                 {
-                    PkUsuario = u.PkUsuario,
-                    Nombre = u.Nombre,
-                    Username = u.Username,
-                    Password = u.Password,
-                    NombreRol = u.Roles != null ? u.Roles.Nombre : string.Empty
-                })
-                .ToListAsync();
+                    Success = false
+                };
+            }
+
+            var usuariosDto = usuarios.Select(u => new UsuarioDto
+            {
+                PkUsuario = u.PkUsuario,
+                Nombre = u.Nombre,
+                Username = u.Username,
+                Password = u.Password,
+                NombreRol = u.Roles?.Nombre ?? string.Empty
+            }).ToList();
 
             return new Response<List<UsuarioDto>>
             {
                 Success = true,
-                Result = usuarios
+                Result = usuariosDto
             };
         }
 

@@ -1,7 +1,9 @@
-﻿using Domain.dto;
+﻿using Dapper;
+using Domain.dto;
 using Domain.Entities;
 using Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using WebAPI103.Context;
 using WebAPI103.Services.Interfaces;
 
@@ -18,54 +20,51 @@ namespace WebAPI103.Services
 
         public async Task<Response<List<Rol>>> ObtenerRoles()
         {
-            var roles = await _context.rols.ToListAsync();
+            var roles = await _context.Database.GetDbConnection()
+                .QueryAsync<Rol>("spGetRol", commandType: System.Data.CommandType.StoredProcedure);
 
             return new Response<List<Rol>>
             {
                 Success = true,
-                Result = roles
+                Result = roles.ToList()
             };
         }
 
         public async Task<Response<Rol>> ById(int id)
         {
-            var rol = await _context.rols
-                .FirstOrDefaultAsync(r => r.PkRol == id);
+            var rol = await _context.Database.GetDbConnection()
+                .QueryFirstOrDefaultAsync<Rol>("spGetRolPorId", new {RolID = id}, commandType: System.Data.CommandType.StoredProcedure);
 
             if (rol == null)
             {
                 return new Response<Rol>(null!, "Rol no encontrado")
                 {
-                    Success = false
+                    Success = false,
                 };
             }
 
-            return new Response<Rol>(rol);
+            return new Response<Rol>(rol, "Rol encontrado");
         }
 
         public async Task<Response<Rol>> Create(RolRequestDto request)
         {
-            bool existe = await _context.rols
-                .AnyAsync(r => r.Nombre == request.Nombre);
-
-            if (existe)
+            try
             {
-                return new Response<Rol>(null!, "Ya existe un rol con ese nombre")
+                await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $"EXEC spCreateRol {request.Nombre}, {request.Estatus}");
+
+                var nuevo = await _context.rols
+                    .FirstOrDefaultAsync(r => r.Nombre == request.Nombre);
+
+                return new Response<Rol>(nuevo!, "Rol creado correctamente");
+            }
+            catch (Exception ex)
+            {
+                return new Response<Rol>(null!, ex.Message)
                 {
                     Success = false
                 };
             }
-
-            Rol nuevo = new Rol
-            {
-                Nombre = request.Nombre,
-                Estatus = request.Estatus
-            };
-
-            await _context.rols.AddAsync(nuevo);
-            await _context.SaveChangesAsync();
-
-            return new Response<Rol>(nuevo, "Rol creado correctamente");
         }
 
         public async Task<Response<Rol>> Update(int id, RolRequestDto request)
@@ -92,10 +91,15 @@ namespace WebAPI103.Services
                 };
             }
 
-            rol.Nombre = request.Nombre;
-            rol.Estatus = request.Estatus;
-
-            await _context.SaveChangesAsync();
+            await _context.Database.GetDbConnection().
+                ExecuteAsync("spUpdateRolPorId",
+                new
+                {
+                    RolID = id,
+                    Nombre = request.Nombre,
+                    Estatus =request.Estatus
+                },
+                commandType: System.Data.CommandType.StoredProcedure);
 
             return new Response<Rol>(rol, "Rol actualizado correctamente");
         }
@@ -113,7 +117,8 @@ namespace WebAPI103.Services
                 };
             }
 
-            bool enUso = await _context.usuarios.AnyAsync(u => u.FkRol == id);
+            bool enUso = await _context.usuarios
+                .AnyAsync(u => u.FkRol == id);
 
             if (enUso)
             {
@@ -123,10 +128,17 @@ namespace WebAPI103.Services
                 };
             }
 
-            _context.rols.Remove(rol);
-            await _context.SaveChangesAsync();
+            await _context.Database.GetDbConnection()
+                .ExecuteAsync(
+                    "spDeleteRolPorId",
+                    new { RolID = id },
+                    commandType: System.Data.CommandType.StoredProcedure
+                );
 
-            return new Response<Rol>(rol, "Rol eliminado correctamente");
+            return new Response<Rol>(rol, "Rol eliminado correctamente")
+            {
+                Success = true
+            };
         }
     }
 }
